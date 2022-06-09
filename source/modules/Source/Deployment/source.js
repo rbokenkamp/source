@@ -11,7 +11,10 @@ module.exports = class extends PreCore.classes.Branch {
             return
         }
         required[type] = reason
-        const {types} = PreCore
+        const { types } = PreCore
+        if (type in types === false) {
+            throw new Error(``)
+        }
         const {params, branches} = types[type]
         if (params.extend) {
             this.addRequiredType({self}, params.extend, type)

@@ -4,14 +4,17 @@ module.exports = class extends PreCore {
     }
 
     static scan(path) {
-        const {readdirSync, readFileSync, existsSync} = PreCore.dependencies.fs
-        const self = existsSync(path+"/self.js") ? require(path+"/self.js"): {}
+        const { readdirSync, readFileSync, existsSync } = PreCore.dependencies.fs
+        if (existsSync(path) === false) {
+            return
+        }
+        const self = existsSync(path + "/self.js") ? require(path + "/self.js") : {}
         self.type = self.type || "Branch"
         const params = self.params ? self.params : self.params = {}
         const items = readdirSync(path)
         const dirs = []
         for (const item of items) {
-            const [first]= item
+            const [first] = item
             if (first === "." || first === "_" || item === "resources" || item === "cert" || item === "self.js") {
                 continue
             }
@@ -30,7 +33,7 @@ module.exports = class extends PreCore {
                 continue
             }
             if (ext === "html" || ext === "scss") {
-                params[key] = readFileSync(path+"/"+item, "utf8")
+                params[key] = readFileSync(path + "/" + item, "utf8")
                 continue
             }
             throw `invalid extension ${ext}`
@@ -50,32 +53,32 @@ module.exports = class extends PreCore {
         for (const handler of handlers) {
             const fn = cls[handler]
             if (typeof fn !== "function" || handler === "constructor") {
-                 continue
+                continue
             }
-             const source = fn.toString()
+            const source = fn.toString()
                 .replace(/.*?\(/, "module.exports = (")
                 .replace(/\)/, ") =>")
             //  const isAsync = source.indexOf("async") === 0
-            const obj = result[handler] = {type: "Handler", params: {source, type}}
+            const obj = result[handler] = { type: "Handler", params: { source, type } }
         }
         return result
     }
     static loadClasses() {
-        const {types, home, classes, metas, sources, dependencies} = PreCore,
+        const { types, home, classes, metas, sources, dependencies } = PreCore,
             unprocessed = Object.assign({}, types),
-            {readFileSync} = dependencies.fs
+            { readFileSync } = dependencies.fs
         let processing = true
         while (processing) {
             processing = false
             for (const type in unprocessed) {
                 let obj = unprocessed[type]
-                const {extend, module} = obj.params
+                const { extend, module } = obj.params
                 if (extend && extend in types === false) {
                     throw `Extend ${extend} does not exist for type ${type}`
                 }
 
                 if (extend === undefined || extend in unprocessed === false) {
-                    const sourceFile = `${home}/modules/${module}/${type}/source.js`
+                    const sourceFile = `${obj.basePath}/modules/${module}/${type}/source.js`
                     const cls = classes[type] = require(sourceFile)
                     sources[type] = readFileSync(sourceFile, "utf8")
 
@@ -91,7 +94,7 @@ module.exports = class extends PreCore {
                         branches: {},
                     }
 
-                     if (extend) {
+                    if (extend) {
                         obj = types[type] = PreCore.core.branches.modules.branches[module].branches[type] = PreCore.merge(types[extend], obj)
                     }
 
@@ -106,15 +109,19 @@ module.exports = class extends PreCore {
             }
         }
     }
-    static scanTypes() {
-        const {types} = PreCore
-        const modules = PreCore.core.branches.modules.branches
+    static scanTypes(base, basePath) {
+        const { types } = PreCore
+        if (base === undefined) {
+            return
+        }
+        const modules = base.branches
         for (const module in modules) {
             const items = modules[module].branches
             for (const type in items) {
                 const obj = types[type] = items[type]
                 obj.params = obj.params || {}
                 obj.params.module = module
+                obj.basePath = basePath
             }
         }
     }
@@ -169,9 +176,17 @@ module.exports = class extends PreCore {
         return changed ? result : undefined
     }
 
-    static boot() {
+    static boot(deployment) {
         PreCore.core = this.scan(this.home)
-        this.scanTypes()
+        this.scanTypes(PreCore.core.branches.modules, this.home)
+        if (deployment) {
+            if (deployment) {
+                PreCore.core.branches.deployment = deployment
+                const { home } = deployment.params
+                const modules = this.scan(home + "/modules")
+                this.scanTypes("modules", home + "/modules")
+            }
+        }
         this.loadClasses()
     }
 

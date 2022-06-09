@@ -21,7 +21,7 @@ module.exports = deployment => {
         depth: 0,
     })
 
-    PreCore.boot()
+    PreCore.boot(deployment)
 
     const result = (action, data) => {
         if (action === "reject") {
@@ -31,6 +31,5 @@ module.exports = deployment => {
         const core = PreCore.exec({}, {self: PreCore.core, handler: "extract"})
     }
 
-    PreCore.core.branches.deployment = deployment
     PreCore.exec({result}, {self: PreCore.core, handler: "instance"})
 }

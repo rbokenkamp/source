@@ -3,5 +3,9 @@ module.exports = {
     params: {
         key: "core",
         path: "",
+    },
+    branches: {
+      modules: undefined,
+      deployment: undefined,
     }
 }
