@@ -3,12 +3,15 @@ module.exports = class extends PreCore.classes.Branch {
     static respond({self}, request, response) {
         let {url} = request
         console.log("@@@", url)
-        if (url === "/" || url === "/index.html") {
-            response.writeHead(302, {
-                location: "/landing",
-            })
-            return response.end()
+        if (url === "/") {
+            url = "/index.html"
         }
+     //   if (url === "/" || url === "/index.html") {
+     //       response.writeHead(302, {
+      //          location: "/landing",
+      //      })
+      //      return response.end()
+    //    }
         if (url.lastIndexOf(".") === -1) {
             url += "/index.html"
         }
@@ -54,9 +57,8 @@ module.exports = class extends PreCore.classes.Branch {
        let resolved
         server.listen(port, (err) => {
             if (err) {
-                result("reject", err)
-                return console.log('something bad happened', err)
-            }
+                return result("reject", err)
+           }
 
             resolved = true
             console.log(`Http listening on ${port}`)
