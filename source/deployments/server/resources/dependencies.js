@@ -1,0 +1,1 @@
+PreCore.dependencies = {"fs":require("fs"),"http":require("http"),"https":require("https"),"ws":require("ws")}

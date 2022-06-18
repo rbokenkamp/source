@@ -1,11 +1,10 @@
 module.exports = {
     type: "Core",
     params: {
-        key: "core",
+        key: "source",
         path: "",
     },
     branches: {
-      modules: undefined,
-      deployment: undefined,
+        modules: undefined,
     }
 }

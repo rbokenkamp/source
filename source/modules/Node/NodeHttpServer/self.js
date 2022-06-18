@@ -26,9 +26,6 @@ module.exports = {
                 },
                 certHome: {
                     type: "String",
-                    params: {
-                        required: true,
-                    }
                 },
                 mimes: {
                     type: "Param",

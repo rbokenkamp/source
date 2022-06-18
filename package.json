@@ -1,28 +1,14 @@
 {
-  "name": "source",
+  "name": "today",
   "version": "0.0.0",
-  "description": "Source",
-  "main": "index.js",
+  "description": "",
+  "main": "start.js",
   "scripts": {
     "test": "test.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/rbokenkamp/source.git"
-  },
-  "keywords": [
-    "Source"
-  ],
   "author": "raymond@bokenkamp.com",
   "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/rbokenkamp/source/issues"
-  },
-  "homepage": "https://github.com/rbokenkamp/source#readme",
   "dependencies": {
-    "json2yaml": "^1.1.0",
-    "sass": "^1.52.2",
-    "ws": "^8.7.0",
-    "yamljs": "^0.3.0"
+    "sass": "^1.52.3"
   }
 }
