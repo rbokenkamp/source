@@ -1,6 +1,6 @@
 const home = __dirname+"/source"
 global.PreCore = require(`${home}/modules/Core/PreCore/source.js`)
-global.PreCore = require(`${home}/modules/Library/LibraryPreCore/source.js`)
+global.PreCore = require(`${home}/modules/Source/SourcePreCore/source.js`)
 PreCore.home = home
 
 const result = (action, data) => {
