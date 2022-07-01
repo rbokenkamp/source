@@ -1,5 +1,5 @@
 module.exports = class {
-    static exec({result}, {self, handler, arg}) {
+    static exec({result, output}, {self, handler, arg}) {
         const {types, classes} = PreCore
         const {type} = self
 
@@ -14,11 +14,11 @@ module.exports = class {
         try {
             const arg2 = arg || []
             if (isAsync) {
-                classes[type][handler]({self, result}, ...arg2)
+                classes[type][handler]({self, result, output}, ...arg2)
             } else {
-                const output = classes[type][handler]({self}, ...arg2)
-                result && result("resolve", output)
-                return output
+                const out = classes[type][handler]({self, output}, ...arg2)
+                result && result("resolve", out)
+                return out
             }
         } catch (err) {
             if (result) {

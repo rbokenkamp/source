@@ -1,3 +1,4 @@
+
 module.exports = class extends PreCore.classes.Branch {
 
     static open({self}) {
@@ -51,7 +52,7 @@ module.exports = class extends PreCore.classes.Branch {
         while (current) {
             const cls = PreCore.classes[current.type]
             if (event in cls) {
-                return cls[event]({self: parent}, data)
+                return cls[event]({self: current}, data)
             }
             current = current.parent
         }

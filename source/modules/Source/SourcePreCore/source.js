@@ -1,7 +1,8 @@
 module.exports = class extends PreCore {
 
     static scan(path) {
-        const {readdirSync, readFileSync, existsSync} = PreCore.dependencies.fs
+        const {classPaths, dependencies} = PreCore
+        const {readdirSync, readFileSync, existsSync} = dependencies.fs
         const self = existsSync(path + "/self.js") ? require(path + "/self.js") : {}
         self.type = self.type || "Branch"
         const params = self.params ? self.params : self.params = {}
@@ -9,7 +10,10 @@ module.exports = class extends PreCore {
         const dirs = []
         for (const item of items) {
             const [first] = item
-            if (first === "." || item === "resources" || item === "self.js") {
+            if (first === "." ||
+                item === "resources" ||
+                item === "build" ||
+                item === "self.js") {
                 continue
             }
             const index = item.lastIndexOf(".")
@@ -21,15 +25,18 @@ module.exports = class extends PreCore {
             const key = item.substring(0, index)
             if (ext === "js") {
                 if (item === "source.js") {
+                    const type = path.substring(path.lastIndexOf("/")+1)
+                    classPaths[type] = path+"/source.js"
                     continue
                 }
                 params[key] = require(path + "/" + key + ".js")
                 continue
             }
-            if (ext === "html" || ext === "scss") {
+            if (ext === "html" || ext === "scss" || ext === "sh") {
                 params[key] = readFileSync(path + "/" + item, "utf8")
                 continue
             }
+
             throw `invalid extension ${ext}`
         }
         if (dirs.length == 0) {
@@ -67,7 +74,7 @@ module.exports = class extends PreCore {
     }
 
     static processTypes(unordered) {
-        const {types} = PreCore
+       const {types} = PreCore
         const unprocessed = Object.assign({}, unordered)
         let processing = true
         while (processing) {
@@ -88,13 +95,12 @@ module.exports = class extends PreCore {
     }
 
     static async requireClass(type) {
-        const {home, types, classes} = PreCore
-        const {module} = types[type].params
-        classes[type] = require(`${home}/modules/${module}/${type}/source.js`)
+        const {classPaths, classes} = PreCore
+        classes[type] = require(classPaths[type])
     }
 
     static processModules() {
-        const {types, classes, sources, dependencies} = PreCore,
+        const {types, classes, sources, dependencies, classPaths} = PreCore,
             {readFileSync} = dependencies.fs
         for (const type in types) {
             let obj = types[type]
@@ -116,7 +122,7 @@ module.exports = class extends PreCore {
                 obj = this.merge(extendObj, obj)
             }
             PreCore.core.branches.modules.branches[module].branches[type] = obj
-            sources[type] = readFileSync(`${PreCore.home}/modules/${module}/${type}/source.js`, "utf8")
+            sources[type] = readFileSync(classPaths[type], "utf8")
         }
 
     }
@@ -180,14 +186,22 @@ module.exports = class extends PreCore {
         try {
 
             Object.assign(PreCore, {
-                dependencies: {
-                    fs: require("fs"),
-                    sass: require("sass"),
+                dependencies: PreCore.dependencies || {
                 },
                 types: {},
                 sources: {},
+                classPaths: {},
             })
-            PreCore.core = this.scan(PreCore.home)
+            Object.assign(PreCore.dependencies, {
+                fs: require("fs"),
+                sass: require("sass"),
+            })
+
+            const paths = PreCore.paths || []
+            paths.push(PreCore.home)
+            for (const path of paths) {
+                PreCore.core = this.merge(PreCore.core, this.scan(path))
+            }
             const types = this.getTypes()
             this.processTypes(types)
             await super.start(result)

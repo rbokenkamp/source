@@ -1,9 +1,13 @@
 .LanguageSelector img {
   height: 6vh;
   margin: .4vh;
-  opacity: .5;
 }
 
-.LanguageSelector img.Selected {
-  opacity: 1;
+.LanguageSelector[mode=edit] {
+  img {
+    opacity: .3;
+  }
+  img.Selected {
+    opacity: 1;
+  }
 }

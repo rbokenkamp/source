@@ -1,7 +1,7 @@
 module.exports = {
     type: "Type",
     params: {
-        extend: "Branch",
+        extend: "HttpServer",
         dependencies: {
             fs: "fs",
             http: "http",
@@ -12,12 +12,6 @@ module.exports = {
         metas: {
             type: "Branch",
             branches: {
-                port: {
-                    type: "Integer",
-                    params: {
-                        required: true,
-                    }
-                },
                 home: {
                     type: "String",
                     params: {
@@ -27,12 +21,6 @@ module.exports = {
                 certHome: {
                     type: "String",
                 },
-                mimes: {
-                    type: "Param",
-                    params: {
-                        required: true,
-                    }
-                }
             }
         },
         handlers: {

@@ -12,6 +12,9 @@ module.exports = class extends PreCore.classes.Branch {
         }
         required[type] = reason
         const {types} = PreCore
+        if (type in types === false) {
+            throw `Type ${type} does not exist`
+        }
         const {params, branches} = types[type]
         if (params.extend) {
             this.addRequiredType({self}, params.extend, type)

@@ -3,8 +3,17 @@ module.exports = class extends PreCore.classes.Core {
     static open({self}) {
         this.setStyles({self})
         this.setTitle({self})
+        this.detectLanguage({self})
         this.setLanguage({self}, true)
         this.setEventHandler({self})
+    }
+
+    static detectLanguage({self}) {
+        let {language} = navigator
+        language = language.indexOf("en") === 0 ? "us": language
+        if (language in self.branches.languages.branches) {
+            self.params.language = language
+        }
     }
 
     static setLanguage({self}, noSignal) {

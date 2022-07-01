@@ -1,1 +1,0 @@
-PreCore.dependencies = {"http":require("http"),"https":require("https")}

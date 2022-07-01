@@ -1,4 +1,4 @@
-module.exports = class extends PreCore.classes.Branch {
+module.exports = class extends PreCore.classes.HttpServer {
 
     static respond({self}, request, response) {
         let {url} = request
@@ -13,7 +13,7 @@ module.exports = class extends PreCore.classes.Branch {
             url += "/index.html"
         }
 
-         const {home, mimes} = self.params,
+        const {home, mimes} = self.params,
             {existsSync, readFileSync} = PreCore.dependencies.fs,
             full = home + url,
             index = url.lastIndexOf(".")
@@ -32,30 +32,50 @@ module.exports = class extends PreCore.classes.Branch {
         response.end(content)
     }
 
+    static input({ self , output}, data) {
+        const {requestId, path, query, method} = data
+        const response = self.requests[requestId]
+        response.end("hello")
+        output(data)
+    }
 
     static open({self, result}) {
         const {params} = self,
             {readFileSync} = PreCore.dependencies.fs,
             {certHome, port} = params,
-            {createServer} = PreCore.dependencies[certHome ? "https": "http"],
+            {createServer} = PreCore.dependencies[certHome ? "https" : "http"],
             connections = self.connections = {},
             options = {}
 
         if (certHome) {
             options.key = readFileSync(`${certHome}/key.pem`, "utf8"),
-            options.cert = readFileSync(`${certHome}/cert.pem`, "utf8")
+                options.cert = readFileSync(`${certHome}/cert.pem`, "utf8")
         }
 
+     //   const requests = self.requests = {}
+    //    self.requestIndex = 0
         const server = self.server = createServer(options, (request, response) => {
-            this.respond({self}, request, response)
+            const {path, query} = this.parsePath(request.url)
+            const requestId = self.requestIndex++
+            const method = request.method
+        //    requests[requestId] = response
+            /*
+            this.output({self}, {
+                requestId,
+                path,
+                query,
+                method
+            })
+
+             */
+                  this.respond({self}, request, response)
         })
 
 
-       let resolved
+        let resolved
         server.listen(port, (err) => {
             if (err) {
-                result("reject", err)
-                return console.log('something bad happened', err)
+                return result("reject", err)
             }
 
             resolved = true
@@ -66,7 +86,7 @@ module.exports = class extends PreCore.classes.Branch {
         server.on("connection", socket => {
             const key = index++
             connections[key] = socket
-             socket.on("close", () => {
+            socket.on("close", () => {
                 delete connections[key]
             })
         })

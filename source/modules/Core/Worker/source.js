@@ -1,13 +1,15 @@
 module.exports = class extends PreCore.classes.Branch {
 
 
-    static input({ self }, params) {
-        this.output({ self }, params)
+    static input({ self , output}, data) {
+        output(data)
     }
 
-    static output({ self }, params) {
-        if (self.next) {
-            PreCore.classes[self.next.type].input({self: self.next}, params)
-        }
+    static output({ self }, data) {
+        const {key} = self.params
+        PreCore.exec({}, {self: self.parent,
+            handler: "handleOutput",
+            arg: [key, data],
+        })
     }
 }
